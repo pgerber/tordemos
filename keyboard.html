@@ -8,24 +8,34 @@
      font-family: 'Courier New', monospace;
      white-space: pre;
    }
+
+   .box {
+     display: grid;
+     grid-template-columns: 1fr 1fr;
+   }
   </style>
  </head>
  <body>
   <input type="text" id="keyInput"></input>
-  <div>
-    <div id="down" class="result"></div>
-    <div id="press" class="result"></div>
-    <div id="up" class="result"></div>
+  <div class="box">
+    <div id="history" class="result"></div>
+    <div>
+      <div id="down" class="result"></div>
+      <div id="press" class="result"></div>
+      <div id="up" class="result"></div>
+    </div>
   </div>
   <script type="application/javascript">
    let input = document.getElementById("keyInput"),
        props = ["key", "charCode", "which", "code", "keyCode", "location", "altKey", "ctrlKey", "metaKey", "shiftKey"],
        modifierKeys = ["Alt", "AltGraph", "CapsLock", "Control", "Fn", "FnLock", "Hyper", "Meta", "NumLock", "OS", "ScrollLock", "Shift", "Super", "Symbol", "SymbolLock"],
-       codes = [];
+       codes = [],
+       millis = 0;
    let showKeyEvent = function (type) {
      input.addEventListener("key" + type, function (event) {
        console.log(event);
        let resultDiv = document.getElementById(type);
+       let historyDiv = document.getElementById("history");
        let result = "event = key" + type + "\n";
        for (let prop of props) {
          result += prop + " = " + event[prop] + "\n";
@@ -36,8 +46,17 @@
            modifiers.push(modifierKey);
          }
        }
+       let now = new Date().getTime();
+       let duration = now - millis;
+       console.log(duration)
        result += "ModifierState: " + modifiers.join(", ") + "\n";
        resultDiv.innerHTML = result;
+       let hist_entry =  result + "\n";
+       if (duration > 500) {
+         hist_entry = hist_entry + '<p style="color: red;">--- events more than 500ms apart ---</p>\n';
+       }
+       historyDiv.innerHTML = hist_entry + historyDiv.innerHTML;
+       millis = now;
      });
    };
 
